@@ -1,5 +1,5 @@
 {
-  "name": "chatgpt-obsidian-exporter",
+  "name": "chatgpt-utils",
   "version": "0.1.0",
   "private": true,
   "description": "Chrome extension: export ChatGPT responses to Obsidian Markdown",

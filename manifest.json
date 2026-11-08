@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT → Obsidian Markdown Exporter",
+  "name": "chatgpt-utils",
   "version": "0.2.0",
   "description": "Export ChatGPT responses to Markdown (formatting, images, diagrams intact) and navigate long answers with an outline. DOM only, no API token.",
   "permissions": [

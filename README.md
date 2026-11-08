@@ -1,4 +1,4 @@
-# ChatGPT → Obsidian Markdown Exporter
+# chatgpt-utils
 
 Hai tính năng: **Export** từng response ra Markdown cho Obsidian, và **Outline** để di chuyển nhanh trong hội thoại dài.
 

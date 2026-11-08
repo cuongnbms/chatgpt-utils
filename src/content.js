@@ -111,7 +111,7 @@
         });
         return this.store(dataUrl, kind);
       } catch (e) {
-        console.warn('[ChatGPT Exporter] rasterize failed', e);
+        console.warn('[chatgpt-utils] rasterize failed', e);
         this.warnings.push('Không chụp được ' + (kind || 'diagram') + ': ' + (e && e.message));
         return null;
       }
@@ -242,7 +242,7 @@
           const warnings = await it.run(roots);
           toast(it.done + (warnings.length ? '\n⚠ ' + warnings.join('\n⚠ ') : ''), false);
         } catch (e) {
-          console.error('[ChatGPT Exporter]', e);
+          console.error('[chatgpt-utils]', e);
           toast('Export lỗi: ' + (e && e.message || e), true);
         }
       };
@@ -298,7 +298,7 @@
     const roots = findResponseRoots(document);
     const turns = new Set(roots.map(turnOf).filter(Boolean));
     turns.forEach(inject);
-    if (globalThis.CGE.outline) globalThis.CGE.outline.refresh().catch((e) => console.warn('[ChatGPT Exporter] outline', e));
+    if (globalThis.CGE.outline) globalThis.CGE.outline.refresh().catch((e) => console.warn('[chatgpt-utils] outline', e));
   }
 
   let timer = null;
