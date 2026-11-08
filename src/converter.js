@@ -322,7 +322,7 @@
     async mermaid(el) {
       const pane = el.querySelector('[data-code-block-preview-pane]') || el;
       const img = await this.raster(pane, 'Mermaid diagram', 'mermaid');
-      return img || '*[Mermaid diagram — không chụp được ảnh]*';
+      return img || '*[Mermaid diagram — could not capture image]*';
     }
 
     async visualization(el) {

@@ -97,7 +97,7 @@
       try {
         ref = this.store(await fetchAsDataUrl(src), '');
       } catch (e) {
-        this.warnings.push('Không tải được ảnh (giữ link gốc): ' + src.slice(0, 80));
+        this.warnings.push('Could not fetch image (kept original link): ' + src.slice(0, 80));
         ref = /^https?:/.test(src) ? src : null;
       }
       this.byKey.set(src, ref);
@@ -112,7 +112,7 @@
         return this.store(dataUrl, kind);
       } catch (e) {
         console.warn('[chatgpt-utils] rasterize failed', e);
-        this.warnings.push('Không chụp được ' + (kind || 'diagram') + ': ' + (e && e.message));
+        this.warnings.push('Could not capture ' + (kind || 'diagram') + ': ' + (e && e.message));
         return null;
       }
     }
@@ -221,8 +221,8 @@
       'font:14px/1.3 system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.18);' +
       (dark ? 'background:#2f2f2f;color:#ececec;border:1px solid #444;' : 'background:#fff;color:#0d0d0d;border:1px solid #e5e5e5;');
     const items = [
-      { label: 'Copy Markdown', hint: 'ảnh/diagram nhúng base64', run: copyMarkdown, done: 'Đã copy Markdown' },
-      { label: 'Tải .zip cho Obsidian', hint: 'note .md + attachments/', run: downloadZip, done: 'Đã tải file .zip' },
+      { label: 'Copy Markdown', hint: 'images/diagrams embedded as base64', run: copyMarkdown, done: 'Markdown copied' },
+      { label: 'Download .zip for Obsidian', hint: 'note .md + attachments/', run: downloadZip, done: '.zip downloaded' },
     ];
     for (const it of items) {
       const b = document.createElement('button');
@@ -237,13 +237,13 @@
       b.onclick = async () => {
         closeMenu();
         const roots = findResponseRoots(turn);
-        if (!roots.length) return toast('Không tìm thấy nội dung response', true);
+        if (!roots.length) return toast('Response content not found', true);
         try {
           const warnings = await it.run(roots);
           toast(it.done + (warnings.length ? '\n⚠ ' + warnings.join('\n⚠ ') : ''), false);
         } catch (e) {
           console.error('[chatgpt-utils]', e);
-          toast('Export lỗi: ' + (e && e.message || e), true);
+          toast('Export failed: ' + (e && e.message || e), true);
         }
       };
       menu.appendChild(b);

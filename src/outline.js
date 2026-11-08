@@ -77,7 +77,7 @@
   function flattenOutline(groups, level) {
     const out = [];
     for (const g of groups) {
-      if (g.question) out.push({ level: 0, text: g.question.text || '(câu hỏi)', el: g.question.el });
+      if (g.question) out.push({ level: 0, text: g.question.text || '(question)', el: g.question.el });
       for (const it of g.items) if (it.level <= level) out.push(it);
     }
     return out;
@@ -171,14 +171,14 @@
     const s = state.shadow;
     const theme = isDarkPage() ? 'dark' : 'light';
     if (state.collapsed) {
-      s.innerHTML = '<style>' + CSS + '</style><div class="wrap ' + theme + '"><button class="fab" title="Mở outline" aria-label="Mở outline">' + ICON_LIST + '</button></div>';
+      s.innerHTML = '<style>' + CSS + '</style><div class="wrap ' + theme + '"><button class="fab" title="Open outline" aria-label="Open outline">' + ICON_LIST + '</button></div>';
       s.querySelector('.fab').onclick = () => setCollapsed(false);
       return;
     }
     s.innerHTML = '<style>' + CSS + '</style><div class="wrap ' + theme + '"><div class="panel">' +
-      '<div class="head"><span>Outline</span><div class="lv" role="group" aria-label="Cấp heading">' +
-      [1, 2, 3].map((n) => '<button class="lvb' + (n === state.level ? ' on' : '') + '" data-lv="' + n + '" aria-pressed="' + (n === state.level) + '" title="Hiện tới H' + n + '">H' + n + '</button>').join('') +
-      '</div><button class="btn close" title="Thu gọn" aria-label="Thu gọn outline">' + ICON_CLOSE + '</button></div>' +
+      '<div class="head"><span>Outline</span><div class="lv" role="group" aria-label="Heading level">' +
+      [1, 2, 3].map((n) => '<button class="lvb' + (n === state.level ? ' on' : '') + '" data-lv="' + n + '" aria-pressed="' + (n === state.level) + '" title="Show up to H' + n + '">H' + n + '</button>').join('') +
+      '</div><button class="btn close" title="Collapse" aria-label="Collapse outline">' + ICON_CLOSE + '</button></div>' +
       '<div class="list" role="navigation" aria-label="Outline"></div></div></div>';
     s.querySelector('.btn.close').onclick = () => setCollapsed(true);
     s.querySelectorAll('.lvb').forEach((b) => { b.onclick = () => setLevel(+b.dataset.lv); });

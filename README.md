@@ -1,77 +1,77 @@
 # chatgpt-utils
 
-Hai tính năng: **Export** từng response ra Markdown cho Obsidian, và **Outline** để di chuyển nhanh trong hội thoại dài.
+Two features: **Export** a single response to Markdown for Obsidian, and **Outline** for quick navigation in long conversations.
 
-Chrome extension (MV3) xuất **một response** của ChatGPT ra Markdown chuẩn cho Obsidian, giữ nguyên:
+A Chrome extension (MV3) that exports **one ChatGPT response** to clean Markdown for Obsidian, preserving:
 
-- in đậm / in nghiêng / gạch ngang / inline code / link (bỏ `utm_source=chatgpt.com`)
-- heading, list lồng nhau, task list (`- [x]`), blockquote, bảng (kèm căn lề), đường kẻ
-- code block (đúng ngôn ngữ, lấy code gốc)
-- công thức toán KaTeX → `$…$` / `$$…$$`
-- **ảnh** web search (`images.openai.com`) → file ảnh gốc; ảnh upload/generate: chưa kiểm chứng host (xem phần Bảo mật)
-- **diagram / chart / mermaid / card** do ChatGPT vẽ → ảnh PNG (2x)
+- bold / italic / strikethrough / inline code / links (strips `utm_source=chatgpt.com`)
+- headings, nested lists, task lists (`- [x]`), blockquotes, tables (with alignment), horizontal rules
+- code blocks (correct language, original source code)
+- KaTeX math → `$…$` / `$$…$$`
+- web search **images** (`images.openai.com`) → original image files; uploaded/generated images: host not yet verified (see Security)
+- **diagrams / charts / mermaid / cards** drawn by ChatGPT → PNG images (2x)
 
-## Vì sao nút Copy của ChatGPT bị mất format
+## Why ChatGPT's Copy button loses formatting
 
-ChatGPT (2026) render câu trả lời bằng renderer mới ("DIL"): chữ đậm là `<span data-d-default-strong>`, in nghiêng là `data-d-font-style="italic"`, gạch ngang là `data-d-text-decoration="line-through"`… thay vì `<strong>/<em>/<del>`. Diagram là các khối layout (div + mũi tên SVG), chart là SVG inline, mermaid chỉ còn SVG đã render. Extension này đọc trực tiếp các thuộc tính đó.
+ChatGPT (2026) renders answers with a new renderer ("DIL"): bold is `<span data-d-default-strong>`, italic is `data-d-font-style="italic"`, strikethrough is `data-d-text-decoration="line-through"`… instead of `<strong>/<em>/<del>`. Diagrams are layout blocks (divs + SVG arrows), charts are inline SVG, and mermaid is only the rendered SVG. This extension reads those attributes directly.
 
-## Cài đặt
+## Installation
 
-1. `chrome://extensions` → bật **Developer mode**
-2. **Load unpacked** → chọn thư mục này
-3. Reload tab ChatGPT
+1. `chrome://extensions` → enable **Developer mode**
+2. **Load unpacked** → select this folder
+3. Reload the ChatGPT tab
 
-## Sử dụng
+## Usage
 
-Dưới mỗi response có thêm nút **⤓** ở cuối thanh action (cạnh Copy, Like…):
+Each response gets a **⤓** button at the end of its action bar (next to Copy, Like…):
 
-| Lựa chọn | Kết quả |
+| Option | Result |
 | --- | --- |
-| **Copy Markdown** | Markdown vào clipboard, ảnh/diagram nhúng dạng `data:image/png;base64` (tự chứa, note nặng; việc Obsidian hiển thị ảnh base64 chưa được kiểm chứng) |
-| **Tải .zip cho Obsidian** | `<Tiêu đề>.zip` gồm `<Tiêu đề>.md` (có frontmatter `source`, `exported`, `tags`) + `attachments/*.png` — giải nén thẳng vào vault |
+| **Copy Markdown** | Markdown to the clipboard, with images/diagrams embedded as `data:image/png;base64` (self-contained, heavy notes; whether Obsidian displays base64 images has not been verified) |
+| **Download .zip for Obsidian** | `<Title>.zip` containing `<Title>.md` (with `source`, `exported`, `tags` frontmatter) + `attachments/*.png` — extract it straight into your vault |
+
+The **.zip** is recommended for notes with images/diagrams. Extract it with Finder (or `ditto -x -k`); macOS's built-in `unzip` CLI ignores the UTF-8 flag and may mangle non-ASCII file names.
 
 ## Outline
 
-Panel nổi góc phải liệt kê từng câu hỏi của bạn (**Q**) và heading H1–H3 của câu trả lời bên dưới.
+A floating panel on the right lists each of your questions (**Q**) and the H1–H3 headings of the answer below it.
 
-- Bấm một mục để cuộn tới đó; mục đang đọc được tô sáng khi cuộn.
-- Nút **H1 / H2 / H3** trên header: chỉ hiện heading tới cấp đó (câu hỏi luôn hiện); lựa chọn được nhớ.
-- Nút **»** thu gọn panel thành một nút nhỏ; trạng thái được nhớ (`chrome.storage.local`). Màn hình hẹp hơn 1100px mặc định thu gọn.
-- Tự cập nhật khi có câu trả lời mới hoặc chuyển hội thoại. Chỉ hiện khi có từ 2 mục trở lên.
+- Click an item to scroll to it; the section you are reading is highlighted as you scroll.
+- **H1 / H2 / H3** buttons in the header: show headings only up to that level (questions are always shown); the choice is remembered.
+- The **»** button collapses the panel into a small button; the state is remembered (`chrome.storage.local`). Screens narrower than 1100px start collapsed.
+- Updates automatically when a new answer arrives or you switch conversations. Only shown when there are at least 2 items.
 
-Khuyến nghị dùng **.zip** cho note có ảnh/diagram. Giải nén bằng Finder (hoặc `ditto -x -k`); `unzip` CLI có sẵn của macOS không đọc cờ UTF-8 nên có thể làm hỏng tên file tiếng Việt.
+## Security
 
-## Bảo mật
+- Reads only the visible DOM. Does **not** call `/api/auth/session`, does **not** use the access token, does **not** call `/backend-api`.
+- Sends no data anywhere. The only network access: fetching images from `images.openai.com` (web search images, blocked by CORS in the page) through the service worker, without cookies. Same-origin `chatgpt.com` images are fetched directly in the page.
+- Permissions: `clipboardWrite`, `storage` (only stores the outline's collapsed state), host `images.openai.com`. The content script runs only on `chatgpt.com` / `chat.openai.com`.
+- Images from hosts not on the list → the original link is kept (with a warning). To add a host: edit `host_permissions` in `manifest.json` and `ALLOWED_HOSTS` in `src/background.js`.
 
-- Chỉ đọc DOM đang hiển thị. **Không** gọi `/api/auth/session`, **không** dùng access token, **không** gọi `/backend-api`.
-- Không gửi dữ liệu đi đâu. Network duy nhất: tải ảnh từ `images.openai.com` (ảnh web search, bị CORS chặn trong trang) qua service worker, không kèm cookie. Ảnh cùng origin `chatgpt.com` được tải trực tiếp trong trang.
-- Quyền: `clipboardWrite`, `storage` (chỉ lưu trạng thái thu gọn của outline), host `images.openai.com`. Content script chỉ chạy trên `chatgpt.com` / `chat.openai.com`.
-- Ảnh từ host khác không nằm trong danh sách → giữ link gốc (có cảnh báo). Muốn thêm host: sửa `host_permissions` trong `manifest.json` và `ALLOWED_HOSTS` trong `src/background.js`.
-
-## Cấu trúc
+## Structure
 
 ```
 manifest.json
-src/converter.js   DOM → Markdown (chạy được cả trong jsdom)
-src/rasterize.js   element → PNG qua SVG foreignObject (không thư viện ngoài)
-src/outline.js     outline: collectOutline() (test bằng jsdom) + panel
-src/zip.js         ZIP writer tối giản (STORE, tên file UTF-8)
-src/content.js     chèn nút, menu, clipboard, tải zip
-src/background.js  tải ảnh cross-origin cho host được phép
-test/              node:test + jsdom, fixture mô phỏng DOM thật
+src/converter.js   DOM → Markdown (also runs in jsdom)
+src/rasterize.js   element → PNG via SVG foreignObject (no external libraries)
+src/outline.js     outline: collectOutline() (tested with jsdom) + panel
+src/zip.js         minimal ZIP writer (STORE, UTF-8 file names)
+src/content.js     injects the button, menu, clipboard, zip download
+src/background.js  fetches cross-origin images for allowed hosts
+test/              node:test + jsdom, fixtures mimicking the real DOM
 ```
 
-## Test
+## Tests
 
 ```bash
 pnpm install
 pnpm test
 ```
 
-## Giới hạn đã biết
+## Known limitations
 
-- Mermaid: DOM không chứa source mermaid, chỉ có SVG đã render → xuất PNG, không phải code ```` ```mermaid ````.
-- Citation badge (ví dụ "MDN") không có URL trong DOM → xuất thành `(MDN)`.
-- Selector phụ thuộc DOM của ChatGPT; khi OpenAI đổi giao diện có thể cần cập nhật `src/converter.js`.
-- Chỉ export từng response (không export cả hội thoại).
-- Outline: chưa kiểm chứng với hội thoại rất dài — nếu ChatGPT gỡ các lượt cũ khỏi DOM, mục của chúng tạm biến mất cho tới khi hiển thị lại. Chưa kiểm tra giao diện dark mode.
+- Mermaid: the DOM does not contain the mermaid source, only the rendered SVG → exported as PNG, not as ```` ```mermaid ```` code.
+- Citation badges (e.g. "MDN") have no URL in the DOM → exported as `(MDN)`.
+- Selectors depend on ChatGPT's DOM; when OpenAI changes the UI, `src/converter.js` may need updating.
+- Exports one response at a time (not the whole conversation).
+- Outline: not yet verified with very long conversations — if ChatGPT removes old turns from the DOM, their items disappear until they are rendered again. Dark mode has not been checked.

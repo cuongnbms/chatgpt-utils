@@ -22,17 +22,17 @@ const simplify = (outline) => outline.map((g) => ({
 
 test('groups H1–H3 headings under each user question, in document order', () => {
   const d = doc(
-    turn('Error tracking là gì?', '<h1 data-d-component="title">Topic 1</h1><p>x</p><h2>1. Định nghĩa</h2><h3>1.1 <span data-d-default-strong="">Chi tiết</span></h3><h4>bỏ qua</h4>') +
-    turn('So sánh với logging', '<h2>Logging</h2><h2>Monitoring</h2>')
+    turn('What is error tracking?', '<h1 data-d-component="title">Topic 1</h1><p>x</p><h2>1. Definition</h2><h3>1.1 <span data-d-default-strong="">Details</span></h3><h4>ignored</h4>') +
+    turn('Compare with logging', '<h2>Logging</h2><h2>Monitoring</h2>')
   );
   assert.deepEqual(simplify(collectOutline(d)), [
-    { q: 'Error tracking là gì?', items: ['1:Topic 1', '2:1. Định nghĩa', '3:1.1 Chi tiết'] },
-    { q: 'So sánh với logging', items: ['2:Logging', '2:Monitoring'] },
+    { q: 'What is error tracking?', items: ['1:Topic 1', '2:1. Definition', '3:1.1 Details'] },
+    { q: 'Compare with logging', items: ['2:Logging', '2:Monitoring'] },
   ]);
 });
 
 test('items keep a reference to the live heading element', () => {
-  const d = doc(turn('Q', '<h2 id="target">Phần A</h2>'));
+  const d = doc(turn('Q', '<h2 id="target">Section A</h2>'));
   const [g] = collectOutline(d);
   assert.equal(g.items[0].el, d.getElementById('target'));
   assert.equal(g.question.el, d.querySelector('[data-user-message-bubble]'));
@@ -40,9 +40,9 @@ test('items keep a reference to the live heading element', () => {
 
 test('question text: first line only, whitespace collapsed, truncated to 60 chars', () => {
   const long = 'a'.repeat(80);
-  const d = doc(turn('Dòng   một\nDòng hai', '<h2>X</h2>') + turn(long, '<h2>Y</h2>'));
+  const d = doc(turn('Line   one\nLine two', '<h2>X</h2>') + turn(long, '<h2>Y</h2>'));
   const out = collectOutline(d);
-  assert.equal(out[0].question.text, 'Dòng một');
+  assert.equal(out[0].question.text, 'Line one');
   assert.equal(out[1].question.text, 'a'.repeat(59) + '…');
 });
 
@@ -57,8 +57,8 @@ test('ignores empty headings and headings inside excluded UI chrome', () => {
 });
 
 test('a turn without headings still appears (question is a jump target)', () => {
-  const d = doc(turn('Chỉ hỏi ngắn', '<p>trả lời ngắn</p>'));
-  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'Chỉ hỏi ngắn', items: [] }]);
+  const d = doc(turn('Just a short question', '<p>short answer</p>'));
+  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'Just a short question', items: [] }]);
 });
 
 test('a turn with no user bubble has question = null', () => {
@@ -68,24 +68,24 @@ test('a turn with no user bubble has question = null', () => {
 
 test('legacy markup: data-message-author-role user/assistant articles', () => {
   const d = doc(`
-    <article data-testid="conversation-turn-1"><div data-message-author-role="user"><div>Câu hỏi cũ</div></div></article>
-    <article data-testid="conversation-turn-2"><div data-message-author-role="assistant"><div class="markdown"><h2>Trả lời</h2></div></div></article>`);
-  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'Câu hỏi cũ', items: ['2:Trả lời'] }]);
+    <article data-testid="conversation-turn-1"><div data-message-author-role="user"><div>Old question</div></div></article>
+    <article data-testid="conversation-turn-2"><div data-message-author-role="assistant"><div class="markdown"><h2>Answer</h2></div></div></article>`);
+  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'Old question', items: ['2:Answer'] }]);
 });
 
 test('ignores the previous conversation that ChatGPT keeps mounted but hidden', () => {
   // Observed after switching chats: the old thread stays in the DOM inside
   // <div style="display: none !important;">.
   const d = doc(
-    `<div class="relative h-full min-h-0" style="display: none !important;">${turn('Câu hỏi cũ', '<h2>Cũ</h2>')}</div>` +
-    `<div class="relative h-full min-h-0">${turn('Câu hỏi mới', '<h2>Mới</h2>')}</div>`
+    `<div class="relative h-full min-h-0" style="display: none !important;">${turn('Old question', '<h2>Old</h2>')}</div>` +
+    `<div class="relative h-full min-h-0">${turn('New question', '<h2>New</h2>')}</div>`
   );
-  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'Câu hỏi mới', items: ['2:Mới'] }]);
+  assert.deepEqual(simplify(collectOutline(d)), [{ q: 'New question', items: ['2:New'] }]);
 });
 
 test('ignores headings inside cards/widgets (e.g. stat numbers in a box)', () => {
-  const d = doc(turn('Q', '<h2>1. Error Tracking là gì?</h2><div data-d-component="box"><div data-d-component="grid"><h2 data-d-component="title">1,284</h2><h2>326</h2></div></div><div data-client-defined-widget="visualization"><h3>Chart</h3></div><h2>2. Tiếp</h2>'));
-  assert.deepEqual(simplify(collectOutline(d))[0].items, ['2:1. Error Tracking là gì?', '2:2. Tiếp']);
+  const d = doc(turn('Q', '<h2>1. What is Error Tracking?</h2><div data-d-component="box"><div data-d-component="grid"><h2 data-d-component="title">1,284</h2><h2>326</h2></div></div><div data-client-defined-widget="visualization"><h3>Chart</h3></div><h2>2. Next</h2>'));
+  assert.deepEqual(simplify(collectOutline(d))[0].items, ['2:1. What is Error Tracking?', '2:2. Next']);
 });
 
 test('flattenOutline: questions always shown, headings filtered by the H1/H2/H3 level', () => {
