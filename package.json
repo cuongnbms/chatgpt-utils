@@ -2,6 +2,7 @@
   "name": "chatgpt-utils",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.18.0",
   "description": "Chrome extension: export ChatGPT responses to Obsidian Markdown",
   "scripts": {
     "test": "node --test test/*.test.js"

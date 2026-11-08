@@ -64,8 +64,8 @@ test/              node:test + jsdom, fixture mô phỏng DOM thật
 ## Test
 
 ```bash
-npm install
-npm test
+pnpm install
+pnpm test
 ```
 
 ## Giới hạn đã biết
