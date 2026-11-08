@@ -1,15 +1,31 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT → Obsidian Markdown Exporter",
-  "version": "0.1.0",
-  "description": "Export a ChatGPT response to Markdown with bold/italic, tables, math, code, images and diagrams intact. DOM only, no API token.",
-  "permissions": ["clipboardWrite"],
-  "host_permissions": ["https://images.openai.com/*"],
-  "background": { "service_worker": "src/background.js" },
+  "version": "0.2.0",
+  "description": "Export ChatGPT responses to Markdown (formatting, images, diagrams intact) and navigate long answers with an outline. DOM only, no API token.",
+  "permissions": [
+    "clipboardWrite",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://images.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
-      "js": ["src/converter.js", "src/zip.js", "src/rasterize.js", "src/content.js"],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "src/converter.js",
+        "src/zip.js",
+        "src/rasterize.js",
+        "src/outline.js",
+        "src/content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

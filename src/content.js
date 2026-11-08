@@ -298,6 +298,7 @@
     const roots = findResponseRoots(document);
     const turns = new Set(roots.map(turnOf).filter(Boolean));
     turns.forEach(inject);
+    if (globalThis.CGE.outline) globalThis.CGE.outline.refresh().catch((e) => console.warn('[ChatGPT Exporter] outline', e));
   }
 
   let timer = null;
@@ -306,4 +307,14 @@
     timer = setTimeout(scan, 400);
   }).observe(document.documentElement, { childList: true, subtree: true });
   scan();
+
+  // Switching back to a conversation ChatGPT kept mounted may only toggle its
+  // display (no childList mutation), so also rescan when the URL changes.
+  let lastUrl = location.href;
+  setInterval(() => {
+    if (location.href === lastUrl) return;
+    lastUrl = location.href;
+    clearTimeout(timer);
+    timer = setTimeout(scan, 300);
+  }, 700);
 })();

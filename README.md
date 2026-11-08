@@ -1,5 +1,7 @@
 # ChatGPT → Obsidian Markdown Exporter
 
+Hai tính năng: **Export** từng response ra Markdown cho Obsidian, và **Outline** để di chuyển nhanh trong hội thoại dài.
+
 Chrome extension (MV3) xuất **một response** của ChatGPT ra Markdown chuẩn cho Obsidian, giữ nguyên:
 
 - in đậm / in nghiêng / gạch ngang / inline code / link (bỏ `utm_source=chatgpt.com`)
@@ -28,13 +30,22 @@ Dưới mỗi response có thêm nút **⤓** ở cuối thanh action (cạnh Co
 | **Copy Markdown** | Markdown vào clipboard, ảnh/diagram nhúng dạng `data:image/png;base64` (tự chứa, note nặng; việc Obsidian hiển thị ảnh base64 chưa được kiểm chứng) |
 | **Tải .zip cho Obsidian** | `<Tiêu đề>.zip` gồm `<Tiêu đề>.md` (có frontmatter `source`, `exported`, `tags`) + `attachments/*.png` — giải nén thẳng vào vault |
 
+## Outline
+
+Panel nổi góc phải liệt kê từng câu hỏi của bạn (**Q**) và heading H1–H3 của câu trả lời bên dưới.
+
+- Bấm một mục để cuộn tới đó; mục đang đọc được tô sáng khi cuộn.
+- Nút **H1 / H2 / H3** trên header: chỉ hiện heading tới cấp đó (câu hỏi luôn hiện); lựa chọn được nhớ.
+- Nút **»** thu gọn panel thành một nút nhỏ; trạng thái được nhớ (`chrome.storage.local`). Màn hình hẹp hơn 1100px mặc định thu gọn.
+- Tự cập nhật khi có câu trả lời mới hoặc chuyển hội thoại. Chỉ hiện khi có từ 2 mục trở lên.
+
 Khuyến nghị dùng **.zip** cho note có ảnh/diagram. Giải nén bằng Finder (hoặc `ditto -x -k`); `unzip` CLI có sẵn của macOS không đọc cờ UTF-8 nên có thể làm hỏng tên file tiếng Việt.
 
 ## Bảo mật
 
 - Chỉ đọc DOM đang hiển thị. **Không** gọi `/api/auth/session`, **không** dùng access token, **không** gọi `/backend-api`.
 - Không gửi dữ liệu đi đâu. Network duy nhất: tải ảnh từ `images.openai.com` (ảnh web search, bị CORS chặn trong trang) qua service worker, không kèm cookie. Ảnh cùng origin `chatgpt.com` được tải trực tiếp trong trang.
-- Quyền: `clipboardWrite`, host `images.openai.com`. Content script chỉ chạy trên `chatgpt.com` / `chat.openai.com`.
+- Quyền: `clipboardWrite`, `storage` (chỉ lưu trạng thái thu gọn của outline), host `images.openai.com`. Content script chỉ chạy trên `chatgpt.com` / `chat.openai.com`.
 - Ảnh từ host khác không nằm trong danh sách → giữ link gốc (có cảnh báo). Muốn thêm host: sửa `host_permissions` trong `manifest.json` và `ALLOWED_HOSTS` trong `src/background.js`.
 
 ## Cấu trúc
@@ -43,6 +54,7 @@ Khuyến nghị dùng **.zip** cho note có ảnh/diagram. Giải nén bằng Fi
 manifest.json
 src/converter.js   DOM → Markdown (chạy được cả trong jsdom)
 src/rasterize.js   element → PNG qua SVG foreignObject (không thư viện ngoài)
+src/outline.js     outline: collectOutline() (test bằng jsdom) + panel
 src/zip.js         ZIP writer tối giản (STORE, tên file UTF-8)
 src/content.js     chèn nút, menu, clipboard, tải zip
 src/background.js  tải ảnh cross-origin cho host được phép
@@ -62,3 +74,4 @@ npm test
 - Citation badge (ví dụ "MDN") không có URL trong DOM → xuất thành `(MDN)`.
 - Selector phụ thuộc DOM của ChatGPT; khi OpenAI đổi giao diện có thể cần cập nhật `src/converter.js`.
 - Chỉ export từng response (không export cả hội thoại).
+- Outline: chưa kiểm chứng với hội thoại rất dài — nếu ChatGPT gỡ các lượt cũ khỏi DOM, mục của chúng tạm biến mất cho tới khi hiển thị lại. Chưa kiểm tra giao diện dark mode.
