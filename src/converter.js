@@ -481,11 +481,16 @@
         return '[' + text.replace(/\n/g, ' ') + '](' + href + ')';
       }
 
-      let s = await this.inlineChildren(el, st);
-      const strike = el.getAttribute('data-d-text-decoration') === 'line-through' || t === 'DEL' || t === 'S' || t === 'STRIKE';
-      const em = el.getAttribute('data-d-font-style') === 'italic' || t === 'EM' || t === 'I';
-      const strong = el.hasAttribute('data-d-default-strong') || t === 'STRONG' || t === 'B' ||
-        (t === 'SPAN' && STRONG_WEIGHTS.has(el.getAttribute('data-d-weight') || ''));
+      // An ancestor may already apply the same emphasis (DIL wraps <strong> inside
+      // span[data-d-default-strong]); wrap only at the outermost level.
+      st = st || {};
+      const strike = !st.strike && (el.getAttribute('data-d-text-decoration') === 'line-through' || t === 'DEL' || t === 'S' || t === 'STRIKE');
+      const em = !st.em && (el.getAttribute('data-d-font-style') === 'italic' || t === 'EM' || t === 'I');
+      const strong = !st.strong && (el.hasAttribute('data-d-default-strong') || t === 'STRONG' || t === 'B' ||
+        (t === 'SPAN' && STRONG_WEIGHTS.has(el.getAttribute('data-d-weight') || '')));
+      let s = await this.inlineChildren(el, (strike || em || strong)
+        ? Object.assign({}, st, strike && { strike }, em && { em }, strong && { strong })
+        : st);
       if (strong) s = wrap(s, '**');
       if (em) s = wrap(s, '*');
       if (strike) s = wrap(s, '~~');

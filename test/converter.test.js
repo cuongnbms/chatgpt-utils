@@ -29,6 +29,17 @@ test('bold, italic, bold-italic, strike, inline code (DIL attributes)', async ()
   assert.equal(out, 'This paragraph demonstrates **bold text**, *italic text*, ***bold italic***, ~~gone~~, `inline code`.\n');
 });
 
+test('nested emphasis of the same kind is not wrapped twice', async () => {
+  // Live DOM (Nov 2026): <span data-d-default-strong><strong class="Emphasis-…">…</strong></span>
+  const out = await md(`
+    <p data-d-component="text">
+      <span data-d-component="text" data-d-default-strong="" data-d-inline=""><strong>STRIDE</strong></span><span> là </span>
+      <span data-d-default-strong="" data-d-font-style="italic" data-d-inline=""><strong><em>Threat</em></strong></span><span> x </span>
+      <span data-d-text-decoration="line-through"><del>gone</del></span>
+    </p>`);
+  assert.equal(out, '**STRIDE** là ***Threat*** x ~~gone~~\n');
+});
+
 test('whitespace inside emphasis is moved outside the delimiters', async () => {
   const out = await md('<p data-d-component="text">a<span data-d-default-strong=""> b </span>c</p>');
   assert.equal(out, 'a **b** c\n');
