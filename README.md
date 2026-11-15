@@ -10,6 +10,7 @@ A Chrome extension (MV3) that exports **one ChatGPT response** to clean Markdown
 - KaTeX math → `$…$` / `$$…$$`
 - web search **images** (`images.openai.com`) → original image files; uploaded/generated images: host not yet verified (see Security)
 - **diagrams / charts / mermaid / cards** drawn by ChatGPT → PNG images (2x)
+- every image is embedded as `![alt|800](…)` so Obsidian shows it 800px wide (`imageWidth` in `src/converter.js`, `0` = natural size)
 
 ## Why ChatGPT's Copy button loses formatting
 
