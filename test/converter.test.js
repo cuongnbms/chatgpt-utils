@@ -152,7 +152,7 @@ test('image component -> ctx.image; favicons ignored', async () => {
       <img alt="Eiffel tower" src="https://images.openai.com/x.jpg"><div data-d-image-loading=""></div>
       <button data-d-component="pressable" aria-label="Open Eiffel tower"></button>
     </div></div></div>`, { image: async (img) => 'attachments/a-1.jpg' });
-  assert.equal(out, '![Eiffel tower](attachments/a-1.jpg)\n');
+  assert.equal(out, '![Eiffel tower|800](attachments/a-1.jpg)\n');
 });
 
 test('diagram box, chart widget and mermaid preview are rasterized', async () => {
@@ -163,7 +163,13 @@ test('diagram box, chart widget and mermaid preview are rasterized', async () =>
     <div data-client-defined-widget="code_block"><div data-chatgpt-mermaid-preview=""><div data-block-actions="true" data-markdown-copy="exclude"><button>x</button></div><div data-code-block-preview-pane="mermaid"><div data-mermaid-render-status="ready"><svg aria-label="Mermaid diagram"></svg></div></div></div></div>`,
     { rasterize: async (el, kind) => { calls.push(kind); return `attachments/${kind}.png`; } });
   assert.deepEqual(calls, ['diagram', 'chart', 'mermaid']);
-  assert.equal(out, '![Flow overview](attachments/diagram.png)\n\n![Error rate](attachments/chart.png)\n\n![Mermaid diagram](attachments/mermaid.png)\n');
+  assert.equal(out, '![Flow overview|800](attachments/diagram.png)\n\n![Error rate|800](attachments/chart.png)\n\n![Mermaid diagram|800](attachments/mermaid.png)\n');
+});
+
+test('image width is configurable; "|" in alt cannot break the width syntax', async () => {
+  const html = '<div data-d-component="image"><img alt="A | B" src="https://x/a.png"></div>';
+  assert.equal(await md(html, { image: async () => 'a.png' }), '![A - B|800](a.png)\n');
+  assert.equal(await md(html, { image: async () => 'a.png', imageWidth: 0 }), '![A - B](a.png)\n');
 });
 
 test('rasterize failure falls back to text content', async () => {
@@ -203,7 +209,7 @@ test('image card whose only svg is a button icon exports the image, not a screen
       <button data-d-component="pressable" aria-label="Open Eiffel"><svg><use href="/cdn/icons.svg#x"></use></svg></button>
     </div></div></div>`, { image: async () => 'attachments/e.jpg', rasterize: async (el, k) => { calls.push(k); return 'x.png'; } });
   assert.deepEqual(calls, []);
-  assert.equal(out, '![Eiffel](attachments/e.jpg)\n');
+  assert.equal(out, '![Eiffel|800](attachments/e.jpg)\n');
 });
 
 test('copy-code attribute with a leading newline (editor blocks) is trimmed', async () => {

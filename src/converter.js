@@ -197,20 +197,27 @@
         image: async (img) => img.getAttribute('src') || null,
         rasterize: async () => null,
         baseUrl: 'https://chatgpt.com/',
+        imageWidth: 800, // Obsidian display width (![alt|800](…)); 0 = natural size
       }, ctx || {});
+    }
+
+    embed(alt, ref) {
+      const a = (alt || '').replace(/[\[\]\n]/g, ' ').replace(/\|/g, '-').trim();
+      const w = this.ctx.imageWidth ? '|' + this.ctx.imageWidth : '';
+      return '![' + a + w + '](' + ref + ')';
     }
 
     async image(img, alt) {
       if (!img) return '';
       const ref = await this.ctx.image(img);
       if (!ref) return '';
-      return '![' + (alt || img.getAttribute('alt') || '').replace(/[\[\]\n]/g, ' ').trim() + '](' + ref + ')';
+      return this.embed(alt || img.getAttribute('alt'), ref);
     }
 
     async raster(el, alt, kind) {
       const ref = await this.ctx.rasterize(el, kind);
       if (!ref) return null;
-      return '![' + (alt || '').replace(/[\[\]\n]/g, ' ').trim() + '](' + ref + ')';
+      return this.embed(alt, ref);
     }
 
     // ----- blocks -----
