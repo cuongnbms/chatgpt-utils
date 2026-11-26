@@ -249,7 +249,7 @@
 
     isBlockWidget(el) {
       return !!widget(el) || el.hasAttribute('data-chatgpt-mermaid-preview') ||
-        (comp(el) === 'box' && !el.hasAttribute('data-d-inline')) || comp(el) === 'image' ||
+        ((comp(el) === 'box' || comp(el) === 'card') && !el.hasAttribute('data-d-inline')) || comp(el) === 'image' ||
         comp(el) === 'table' || comp(el) === 'divider';
     }
 
@@ -267,7 +267,7 @@
       if (c === 'divider' || t === 'HR') return '---';
       if (c === 'image') return this.image(el.querySelector('img'));
       if (c === 'caption') { const s = await this.inlineChildren(el, st); return s.trim() ? wrap(s.trim(), '*') : ''; }
-      if (c === 'box') return this.box(el, st);
+      if (c === 'box' || c === 'card') return this.box(el, st);
       if (/^H[1-6]$/.test(t)) {
         const s = (await this.inlineChildren(el, st)).replace(/\s*\n\s*/g, ' ').trim();
         return s ? '#'.repeat(+t[1]) + ' ' + s : '';
@@ -356,7 +356,9 @@
         return this.blocks(el, st);
       }
       if (this.hasVisual(el)) {
-        const cap = el.querySelector('[data-d-component="caption"]');
+        // The card's own caption (direct child) describes the whole diagram; nested
+        // captions are node subtitles.
+        const cap = [...el.children].find((c) => comp(c) === 'caption') || el.querySelector('[data-d-component="caption"]');
         const alt = (cap ? plainText(cap) : '') || firstText(el) || 'Diagram';
         const img = await this.raster(el, alt.slice(0, 120), 'diagram');
         if (img) return img;

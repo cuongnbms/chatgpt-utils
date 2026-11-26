@@ -166,6 +166,24 @@ test('diagram box, chart widget and mermaid preview are rasterized', async () =>
   assert.equal(out, '![Flow overview|800](attachments/diagram.png)\n\n![Error rate|800](attachments/chart.png)\n\n![Mermaid diagram|800](attachments/mermaid.png)\n');
 });
 
+test('diagram card (data-d-component="card" with grids, icon arrows) is rasterized as one image', async () => {
+  const calls = [];
+  const out = await md(`
+    <h3 data-d-component="title"><strong>Pipeline</strong></h3>
+    <div data-d-component="card" data-d-direction="col" data-d-has-border="" data-d-variant="default">
+      <div data-d-component="grid"><div data-d-component="grid-item"><div data-d-component="box">
+        <p data-d-component="text"><span data-d-component="text" data-d-default-strong="" data-d-inline=""><strong>noVNC</strong></span></p>
+        <span data-d-component="caption">Remote Desktop</span>
+        <div data-d-component="box">Chrome</div><svg data-d-component="icon"></svg><div data-d-component="box">X11</div>
+      </div></div></div>
+      <div data-d-component="divider"></div>
+      <span data-d-component="caption">noVNC vs Steel</span>
+    </div>`,
+    { rasterize: async (el, kind) => { calls.push(kind + ':' + el.getAttribute('data-d-component')); return 'attachments/d.png'; } });
+  assert.deepEqual(calls, ['diagram:card']);
+  assert.equal(out, '### **Pipeline**\n\n![noVNC vs Steel|800](attachments/d.png)\n');
+});
+
 test('image width is configurable; "|" in alt cannot break the width syntax', async () => {
   const html = '<div data-d-component="image"><img alt="A | B" src="https://x/a.png"></div>';
   assert.equal(await md(html, { image: async () => 'a.png' }), '![A - B|800](a.png)\n');
